@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- UDC TV Digital Lab -->
+<!-- Project: OpenShotClock -->
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSC Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@400;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="console-container">
+    <!-- Header -->
+    <header class="header">
+      <h1>OpenShotClock v0.1</h1>
+      <p>Control Console</p>
+    </header>
+
+    <p class="github-disclaimer">View project guide on <a href="https://github.com/UDC-TV/OpenShotClock" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+
+    <!-- Main Timer Display -->
+    <div class="timer-display">
+      <div class="timer-value" id="mainTimer">0.0</div>
+      <div class="elapsed-time" id="elapsedTime">0.0</div>
+      <div class="timer-label">Time Remaining (Seconds)</div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+      <!-- Main Controls -->
+      <div class="control-section">
+        <h2>Main Controls</h2>
+        <div class="button-grid">
+          <button class="btn btn-primary" id="startStopBtn">
+            <span>Start</span>
+          </button>
+          <button class="btn btn-secondary" id="resetTime1Btn">
+            <span>Reset to Time-1</span>
+          </button>
+          <button class="btn btn-secondary" id="resetTime2Btn">
+            <span>Reset to Time-2</span>
+          </button>
+          <button class="btn btn-success" id="recallPrevBtn">
+            <span>Recall Previous</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Time Adjustment -->
+      <div class="control-section time-adjustment-section">
+        <h2 id="timeAdjustmentHeader" class="collapsed">Time Adjustment (max 1 decimal)</h2>
+        <div class="time-adjustment-content collapsed" id="timeAdjustmentContent">
+          <div class="time-adjustment">
+            <input type="number" id="adjustTimeInput" placeholder="Enter time in seconds" step="0.1" min="0">
+            <button class="btn btn-secondary btn-small" id="setTimeBtn">
+              <span>Set Time</span>
+            </button>
+          </div>
+          <p class="text-muted mt-1" style="font-size: 0.875rem;">Adjust time when timer is stopped</p>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="control-section settings-section">
+        <h2 id="settingsHeader" class="collapsed">Settings</h2>
+        <div class="settings-content collapsed" id="settingsContent">
+          <div class="settings-grid">
+            <div class="setting-item">
+              <label for="time1Input">Time-1 (seconds)</label>
+              <input type="number" id="time1Input" value="24" step="0.1" min="0">
+            </div>
+            <div class="setting-item">
+              <label for="time2Input">Time-2 (seconds)</label>
+              <input type="number" id="time2Input" value="14" step="0.1" min="0">
+            </div>
+          </div>
+
+          <div class="settings-grid mt-2">
+            <div class="setting-item">
+              <label for="keyStartStop">Start/Stop Key (default space)</label>
+              <input type="text" id="keyStartStop" value=" " placeholder="Press a key" readonly>
+            </div>
+            <div class="setting-item">
+              <label for="keyResetTime1">Reset Time-1 Key</label>
+              <input type="text" id="keyResetTime1" value="1" placeholder="Press a key" readonly>
+            </div>
+            <div class="setting-item">
+              <label for="keyResetTime2">Reset Time-2 Key</label>
+              <input type="text" id="keyResetTime2" value="2" placeholder="Press a key" readonly>
+            </div>
+          </div>
+
+          <div class="settings-grid mt-2">
+            <div class="setting-item">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="blankDisplayCheck">
+                <label for="blankDisplayCheck">Blank display when reset to Time-1</label>
+              </div>
+            </div>
+            <div class="setting-item">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="showDecimalsCheck" checked>
+                <label for="showDecimalsCheck">Show decimals on display (≤4.9s)</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-grid mt-2">
+            <div class="setting-item">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="stopOnResetCheck" checked>
+                <label for="stopOnResetCheck">Stop timer on reset</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-grid mt-2">
+            <div class="setting-item">
+              <label for="hornSoundInput">Horn Sound File</label>
+              <input type="file" id="hornSoundInput" accept="audio/*">
+              <p class="text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">Default: static/horn.m4a</p>
+            </div>
+          </div>
+
+          <button class="btn btn-success mt-2" id="saveSettingsBtn">
+            <span>Save Settings</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Display Info -->
+      <div class="control-section">
+        <h2>External Display</h2>
+        <div class="info-box">
+          <p><strong>Display URL:</strong> Open <code>display.html</code> in a separate window or browser</p>
+          <p>The display will automatically synchronize with this console in real-time.</p>
+        </div>
+        <button class="btn btn-secondary mt-1" id="openDisplayBtn">
+          <span>Open Display in New Window</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+<footer class="footer">
+  <p>UDC TV Digital Lab - OpenShotClock</p>
+</footer>
+
+</html>

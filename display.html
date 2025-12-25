@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSC Display</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="display-container" id="displayContainer">
+        <div class="alert-bar" id="stopLamp"></div>
+        <div class="display-timer" id="displayTimer">0</div>
+        <div class="blank-dot" id="blankDot"></div>
+        <div id="audioEnableOverlay"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; cursor: pointer;">
+            <div style="text-align: center; color: white; font-family: var(--font-primary); padding: 2rem;">
+                <h2 style="font-size: 2rem; margin-bottom: 1rem;">🔊 Click to Enable Sound</h2>
+                <p style="font-size: 1.2rem; color: #aaa;">Click anywhere to activate horn sound</p>
+            </div>
+        </div>
+    </div>
+    <audio id="hornSound" src="static/horn.m4a" preload="auto"></audio>
+
+    <script>
+        const displayTimer = document.getElementById('displayTimer');
+        const stopLamp = document.getElementById('stopLamp');
+        const blankDot = document.getElementById('blankDot');
+        const hornSound = document.getElementById('hornSound');
+        const audioEnableOverlay = document.getElementById('audioEnableOverlay');
+        let hasPlayedHorn = false;
+        let audioEnabled = false;
+        let wasRunning = false; // Track previous running state
+
+        // Enable audio on first click
+        audioEnableOverlay.addEventListener('click', () => {
+            hornSound.play().then(() => {
+                hornSound.pause();
+                hornSound.currentTime = 0;
+                audioEnabled = true;
+                audioEnableOverlay.style.display = 'none';
+                console.log('Audio enabled successfully');
+            }).catch((err) => {
+                console.error('Failed to enable audio:', err);
+            });
+        });
+
+        function updateDisplay() {
+            const state = JSON.parse(localStorage.getItem('shotClockState') || '{}');
+            const settings = JSON.parse(localStorage.getItem('shotClockSettings') || '{}');
+            const currentTime = state.currentTime || 0;
+            const isRunning = state.isRunning || false;
+            const blankDisplay = settings.blankDisplay || false;
+            const showDecimals = settings.showDecimals !== false;
+            const time1 = settings.time1 || 24;
+            const hornSoundUrl = settings.hornSoundUrl;
+
+            // Update horn sound source if custom file was uploaded
+            if (hornSoundUrl && hornSoundUrl.startsWith('data:')) {
+                if (hornSound.src !== hornSoundUrl) {
+                    hornSound.src = hornSoundUrl;
+                }
+            }
+
+            // Yellow stop-lamp visible whenever time is at 0.0 (0)
+            // Yellow stop lamp available in OSC displays only for demo/theoretical purposes.
+            // As per FIBA OBR/TOMan, it should not be visible on shot clock displays, only on the basketball backboard.
+            if (currentTime <= 0.05) {
+                stopLamp.classList.add('active');
+
+                if (!hasPlayedHorn) {
+                    console.log('Bar visible, playing horn!');
+
+                    hornSound.currentTime = 0;
+                    hornSound.volume = 1.0;
+
+                    const playPromise = hornSound.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('Horn played successfully');
+                        }).catch((err) => {
+                            console.error('Horn playback error:', err);
+                            // If error is NotAllowedError, it means user interaction is needed
+                            if (err.name === 'NotAllowedError') {
+                                audioEnableOverlay.style.display = 'flex';
+                            }
+                        });
+                    }
+                    hasPlayedHorn = true;
+                }
+            } else {
+                stopLamp.classList.remove('active');
+                hasPlayedHorn = false;
+
+                if (!hornSound.paused) {
+                    hornSound.pause();
+                    hornSound.currentTime = 0;
+                }
+            }
+
+            wasRunning = isRunning;
+
+            // Blank display logic:
+            // If enabled, hide display when time is at or above time1 (e.g. 24.0)
+            // Show immediately when it drops below (e.g. 23.9)
+            // This applies regardless of running state (Start or Stop)
+            if (blankDisplay && currentTime >= (time1 - 0.05)) {
+                // Since blank is always TRUE when time >= time1, DO NOT USE shot clock for time-outs or other non-gameplay actions (as per FIBA OBR/TOMan)!
+                // For this use case, implement a nwew fx
+                displayTimer.classList.add('blank');
+                displayTimer.textContent = '';
+                blankDot.classList.add('visible'); // Show red dot if display blanked (as per FIBA TOMan)
+                return;
+            } else {
+                displayTimer.classList.remove('blank');
+                blankDot.classList.remove('visible'); // Hide red dot if value (any digit) is shown
+            }
+
+            let displayText;
+            if (showDecimals) {
+                displayText = currentTime <= 4.9 ? currentTime.toFixed(1) : Math.floor(currentTime).toString();
+            } else {
+                displayText = Math.ceil(currentTime).toString();
+            }
+            displayTimer.textContent = displayText;
+        }
+
+        window.addEventListener('storage', updateDisplay);
+        updateDisplay();
+
+        setInterval(updateDisplay, 100);
+    </script>
+</body>
+
+</html>
